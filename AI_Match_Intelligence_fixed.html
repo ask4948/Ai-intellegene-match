@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Match Intelligence</title>
+  <style>
+    :root {
+      --bg: #080d17;
+      --panel: #111a29;
+      --panel-2: #0d1522;
+      --border: #243247;
+      --text: #f3f6fb;
+      --muted: #93a3b8;
+      --green: #46e6a5;
+      --blue: #69a7ff;
+      --purple: #b99aff;
+      --red: #ff7e8b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at 80% 0%, rgba(41, 91, 145, .18), transparent 36%),
+        var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .app { width: 100%; max-width: 1180px; margin: 0 auto; padding: 24px; }
+    header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 30px; }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .brand > div:last-child { min-width: 0; }
+    .subtitle { overflow-wrap: anywhere; }
+    .logo {
+      width: 44px; height: 44px; display: grid; place-items: center;
+      border-radius: 14px; background: rgba(70,230,165,.12);
+      border: 1px solid rgba(70,230,165,.35); color: var(--green); font-size: 22px;
+    }
+    h1 { margin: 0; font-size: clamp(20px, 3vw, 27px); letter-spacing: -.7px; }
+    .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .status { color: var(--green); border: 1px solid rgba(70,230,165,.28); background: rgba(70,230,165,.08); border-radius: 999px; padding: 8px 12px; font-size: 12px; white-space: nowrap; }
+    .hero { margin-bottom: 24px; }
+    .eyebrow { color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: 1.8px; text-transform: uppercase; }
+    .hero h2 { margin: 10px 0 8px; font-size: clamp(27px, 5vw, 42px); letter-spacing: -1.5px; }
+    .hero p { color: var(--muted); max-width: 640px; line-height: 1.6; margin: 0; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 18px; }
+    .grid > *, .panel, .stat-card { min-width: 0; }
+    select, button { max-width: 100%; min-width: 0; }
+    .panel { background: linear-gradient(145deg, rgba(17,26,41,.98), rgba(13,21,34,.98)); border: 1px solid var(--border); border-radius: 20px; padding: 22px; box-shadow: 0 12px 40px rgba(0,0,0,.12); }
+    .panel-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+    .panel-title h3 { margin: 0; font-size: 16px; }
+    .small-tag { color: var(--muted); border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px; font-size: 11px; }
+    .teams { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: end; }
+    label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    select {
+      width: 100%; color: var(--text); background: #0a1220; border: 1px solid #2a3b53;
+      border-radius: 11px; padding: 13px 10px; font: inherit; outline: none;
+    }
+    select:focus { border-color: var(--green); }
+    .vs { color: var(--muted); font-size: 12px; padding-bottom: 14px; }
+    .team-preview { display: flex; align-items: center; gap: 12px; min-width: 0; background: rgba(255,255,255,.025); border: 1px solid var(--border); padding: 14px; border-radius: 14px; margin-top: 18px; }
+    .team-preview > div:nth-child(2) { min-width: 0; }
+    .team-name { overflow-wrap: anywhere; }
+    .strength { flex: 0 0 auto; }
+    .crest { width: 42px; height: 42px; flex: 0 0 42px; display: grid; place-items: center; border-radius: 12px; background: #1c2a3d; font-size: 22px; }
+    .team-name { font-weight: 700; }
+    .team-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .strength { margin-left: auto; text-align: right; }
+    .strength strong { font-size: 21px; }
+    .strength small { display: block; color: var(--muted); font-size: 11px; }
+    .predict-btn { width: 100%; margin-top: 18px; padding: 14px; border: 0; border-radius: 12px; background: var(--green); color: #06140f; font-weight: 800; font-size: 14px; cursor: pointer; transition: transform .15s, filter .15s; }
+    .predict-btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
+    .predict-btn:active { transform: translateY(0); }
+    .note { font-size: 11px; color: var(--muted); line-height: 1.5; margin: 12px 0 0; }
+    .prediction-top { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+    .prediction-top h3 { margin: 0; font-size: 16px; }
+    .score { font-size: 36px; font-weight: 800; letter-spacing: -1px; margin: 20px 0 5px; }
+    .score-caption { color: var(--muted); font-size: 12px; }
+    .probabilities { display: grid; gap: 15px; margin-top: 24px; }
+    .prob-head { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; margin-bottom: 8px; }
+    .prob-head span:last-child { font-weight: 800; }
+    .track { height: 8px; background: #263348; border-radius: 999px; overflow: hidden; }
+    .fill { height: 100%; border-radius: inherit; width: 0; transition: width .55s ease; }
+    .home-fill { background: var(--green); }
+    .draw-fill { background: var(--purple); }
+    .away-fill { background: var(--blue); }
+    .insight { border: 1px solid rgba(105,167,255,.25); background: rgba(105,167,255,.07); padding: 14px; border-radius: 13px; color: #c7d8f1; font-size: 12px; line-height: 1.6; margin-top: 22px; }
+    .insight strong { color: var(--text); }
+    .bottom-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-top: 18px; }
+    .stat-card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
+    .stat-label { color: var(--muted); font-size: 12px; }
+    .stat-value { font-size: 25px; font-weight: 800; margin-top: 9px; }
+    .stat-foot { color: var(--muted); font-size: 11px; margin-top: 6px; }
+    footer { text-align: center; color: #718198; font-size: 11px; line-height: 1.6; margin: 28px 0 4px; }
+    @media (max-width: 760px) {
+      .app { padding: 16px; }
+      header { align-items: flex-start; }
+      .brand { flex: 1 1 220px; }
+      .status { font-size: 10px; padding: 7px 9px; }
+      .grid { grid-template-columns: minmax(0, 1fr); }
+      .bottom-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+      .panel { padding: 17px; }
+      .field-row { grid-template-columns: minmax(0, 1fr) !important; }
+      #loadFixturesBtn { width: 100% !important; }
+    }
+    @media (max-width: 430px) {
+      .app { padding: 12px; }
+      .teams { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+      .vs { text-align: center; padding: 0; }
+      .team-preview { padding: 10px; gap: 8px; }
+      .crest { width: 36px; height: 36px; flex-basis: 36px; font-size: 19px; }
+      .strength strong { font-size: 18px; }
+      .panel-title { flex-wrap: wrap; }
+      .prediction-top { flex-wrap: wrap; }
+      .score { font-size: clamp(28px, 9vw, 36px); }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">⚽</div>
+        <div>
+          <h1>AI Match Intelligence</h1>
+          <div class="subtitle">Football analytics • Match prediction lab</div>
+        </div>
+      </div>
+      <div class="status">● Prototype online</div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">Understand the game</div>
+      <h2>Every match tells a story.</h2>
+      <p>Explore team strength and estimated match outcomes with a simple, transparent prediction model. This demo uses sample ratings—not live match data.</p>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <div class="panel-title">
+          <h3>Build a match</h3>
+          <span class="small-tag">MATCH LAB 01</span>
+        </div>
+        <div class="teams">
+          <div>
+            <label for="homeTeam">Home team</label>
+            <select id="homeTeam">
+              <option value="Man City">Manchester City</option>
+              <option value="Arsenal">Arsenal</option>
+              <option value="Liverpool">Liverpool</option>
+              <option value="Real Madrid">Real Madrid</option>
+              <option value="Barcelona">Barcelona</option>
+              <option value="Bayern">Bayern Munich</option>
+              <option value="PSG">Paris Saint-Germain</option>
+            </select>
+          </div>
+          <div class="vs">VS</div>
+          <div>
+            <label for="awayTeam">Away team</label>
+            <select id="awayTeam">
+              <option value="Arsenal">Arsenal</option>
+              <option value="Man City">Manchester City</option>
+              <option value="Liverpool">Liverpool</option>
+              <option value="Real Madrid">Real Madrid</option>
+              <option value="Barcelona">Barcelona</option>
+              <option value="Bayern">Bayern Munich</option>
+              <option value="PSG">Paris Saint-Germain</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="team-preview">
+          <div class="crest" id="homeCrest">🔵</div>
+          <div>
+            <div class="team-name" id="homeName">Manchester City</div>
+            <div class="team-meta">Home team • Sample rating</div>
+          </div>
+          <div class="strength"><strong id="homeStrength">91</strong><small>STRENGTH / 100</small></div>
+        </div>
+        <div class="team-preview">
+          <div class="crest" id="awayCrest">🔴</div>
+          <div>
+            <div class="team-name" id="awayName">Arsenal</div>
+            <div class="team-meta">Away team • Sample rating</div>
+          </div>
+          <div class="strength"><strong id="awayStrength">89</strong><small>STRENGTH / 100</small></div>
+        </div>
+        <button class="predict-btn" id="predictBtn">✦ Analyse this match</button>
+        <p class="note">Prototype only: team ratings are illustrative sample values. They are not current rankings or verified performance data.</p>
+      </div>
+
+      <div class="panel" aria-live="polite">
+        <div class="prediction-top">
+          <h3>Model prediction</h3>
+          <span class="small-tag" id="modelTag">DEMO MODEL</span>
+        </div>
+        <div class="score" id="score">2 – 1</div>
+        <div class="score-caption" id="scoreCaption">Manchester City vs Arsenal • Estimated score</div>
+        <div class="probabilities">
+          <div>
+            <div class="prob-head"><span id="homeProbLabel">Manchester City win</span><span id="homeProb">46%</span></div>
+            <div class="track"><div class="fill home-fill" id="homeBar" style="width:46%"></div></div>
+          </div>
+          <div>
+            <div class="prob-head"><span>Draw</span><span id="drawProb">27%</span></div>
+            <div class="track"><div class="fill draw-fill" id="drawBar" style="width:27%"></div></div>
+          </div>
+          <div>
+            <div class="prob-head"><span id="awayProbLabel">Arsenal win</span><span id="awayProb">27%</span></div>
+            <div class="track"><div class="fill away-fill" id="awayBar" style="width:27%"></div></div>
+          </div>
+        </div>
+        <div class="insight" id="insight"><strong>Initial insight:</strong> Manchester City has a small sample-rating advantage, with home advantage included. Run the analysis to refresh the estimates.</div>
+      </div>
+    </section>
+
+
+    <section class="panel" id="realFixtures" style="margin-top:18px">
+      <div class="panel-title">
+        <div>
+          <h3>Real football fixtures & results</h3>
+          <p class="subtitle">OpenFootball public dataset • Internet connection required</p>
+        </div>
+        <span class="small-tag">DATA FEED</span>
+      </div>
+      <div class="field-row" style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end">
+        <div class="field">
+          <label for="leagueChoice">Competition</label>
+          <select id="leagueChoice">
+            <option value="en.1">English Premier League</option>
+            <option value="es.1">Spanish La Liga</option>
+            <option value="de.1">German Bundesliga</option>
+            <option value="it.1">Italian Serie A</option>
+            <option value="fr.1">French Ligue 1</option>
+          </select>
+        </div>
+        <button class="predict-btn" id="loadFixturesBtn" style="width:auto;margin:0;padding:13px 16px">Load data</button>
+      </div>
+      <p class="note" id="fixtureStatus" aria-live="polite">Tap “Load data” to fetch the current season dataset.</p>
+      <div id="fixtureList" style="display:grid;gap:10px;margin-top:14px"></div>
+      <p class="note">Dataset availability and completeness can vary by league and season. This section shows scheduled fixtures and recorded results from the source, not live match tracking.</p>
+    </section>
+
+    <section class="bottom-grid">
+      <div class="stat-card">
+        <div class="stat-label">Home team rating</div>
+        <div class="stat-value" id="homeStat">91 / 100</div>
+        <div class="stat-foot">Illustrative demo rating</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Rating difference</div>
+        <div class="stat-value" id="differenceStat">+2</div>
+        <div class="stat-foot">Home rating minus away rating</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Away team rating</div>
+        <div class="stat-value" id="awayStat">89 / 100</div>
+        <div class="stat-foot">Illustrative demo rating</div>
+      </div>
+    </section>
+
+    <footer>
+      AI Match Intelligence • Early prototype<br />
+      Predictions are estimates, not guarantees. No live data or trained machine-learning model is connected yet.
+    </footer>
+  </main>
+
+  <script>
+    const teams = {
+      "Man City": { name: "Manchester City", rating: 91, crest: "🔵" },
+      "Arsenal": { name: "Arsenal", rating: 89, crest: "🔴" },
+      "Liverpool": { name: "Liverpool", rating: 88, crest: "🔺" },
+      "Real Madrid": { name: "Real Madrid", rating: 92, crest: "⚪" },
+      "Barcelona": { name: "Barcelona", rating: 88, crest: "🔵" },
+      "Bayern": { name: "Bayern Munich", rating: 89, crest: "🔴" },
+      "PSG": { name: "Paris Saint-Germain", rating: 87, crest: "🔵" }
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const homeSelect = $("homeTeam");
+    const awaySelect = $("awayTeam");
+
+    function normaliseProbabilities(homeRating, awayRating) {
+      // Simple demo formula: team ratings plus a small home advantage.
+      const homeEdge = homeRating + 3 - awayRating;
+      const homeWeight = Math.exp(homeEdge / 12);
+      const awayWeight = Math.exp(-homeEdge / 12);
+      const drawWeight = 0.78 * Math.exp(-Math.abs(homeEdge) / 18);
+      const total = homeWeight + awayWeight + drawWeight;
+      return [
+        Math.round(homeWeight / total * 100),
+        Math.round(drawWeight / total * 100),
+        0
+      ].map((value, i, arr) => i === 2 ? 100 - arr[0] - arr[1] : value);
+    }
+
+    function updateTeamCards() {
+      const home = teams[homeSelect.value];
+      const away = teams[awaySelect.value];
+      $("homeCrest").textContent = home.crest;
+      $("homeName").textContent = home.name;
+      $("homeStrength").textContent = home.rating;
+      $("awayCrest").textContent = away.crest;
+      $("awayName").textContent = away.name;
+      $("awayStrength").textContent = away.rating;
+      $("homeStat").textContent = home.rating + " / 100";
+      $("awayStat").textContent = away.rating + " / 100";
+      const diff = home.rating - away.rating;
+      $("differenceStat").textContent = diff > 0 ? "+" + diff : String(diff);
+      $("homeProbLabel").textContent = home.name + " win";
+      $("awayProbLabel").textContent = away.name + " win";
+      $("scoreCaption").textContent = home.name + " vs " + away.name + " • Estimated score";
+      $("score").textContent = "— – —";
+      $("insight").innerHTML = "<strong>Ready to analyse:</strong> Choose two different teams, then select Analyse this match. Ratings shown are sample values.";
+    }
+
+    function analyseMatch() {
+      if (homeSelect.value === awaySelect.value) {
+        $("insight").innerHTML = "<strong>Choose two teams:</strong> Home and away teams must be different for this demo.";
+        return;
+      }
+
+      const home = teams[homeSelect.value];
+      const away = teams[awaySelect.value];
+      const [homeP, drawP, awayP] = normaliseProbabilities(home.rating, away.rating);
+      const edge = home.rating + 3 - away.rating;
+
+      // Approximate scoreline for demonstration only, not a real score forecast.
+      let homeGoals = Math.max(0, Math.min(4, Math.round(1.35 + edge / 13)));
+      let awayGoals = Math.max(0, Math.min(4, Math.round(1.15 - edge / 18)));
+      if (Math.abs(homeGoals - awayGoals) > 2) awayGoals = Math.max(0, homeGoals - 2);
+      $("score").textContent = homeGoals + " – " + awayGoals;
+      $("homeProb").textContent = homeP + "%";
+      $("drawProb").textContent = drawP + "%";
+      $("awayProb").textContent = awayP + "%";
+      $("homeBar").style.width = homeP + "%";
+      $("drawBar").style.width = drawP + "%";
+      $("awayBar").style.width = awayP + "%";
+
+      let message;
+      if (homeP > awayP && homeP > drawP) {
+        message = "<strong>Demo insight:</strong> " + home.name + " has the highest estimated win probability in this sample model. Home advantage is included.";
+      } else if (awayP > homeP && awayP > drawP) {
+        message = "<strong>Demo insight:</strong> " + away.name + " has the highest estimated win probability despite playing away.";
+      } else {
+        message = "<strong>Demo insight:</strong> The draw has the highest estimated probability in this sample model, so the matchup looks relatively balanced.";
+      }
+      $("insight").innerHTML = message + " These are illustrative estimates, not reliable betting advice or guaranteed results.";
+    }
+
+    homeSelect.addEventListener("change", updateTeamCards);
+    awaySelect.addEventListener("change", updateTeamCards);
+    $("predictBtn").addEventListener("click", analyseMatch);
+    updateTeamCards();
+    analyseMatch();
+
+    const leagueFiles = {
+      "en.1": "English Premier League",
+      "es.1": "Spanish La Liga",
+      "de.1": "German Bundesliga",
+      "it.1": "Italian Serie A",
+      "fr.1": "French Ligue 1"
+    };
+
+    function safeText(value) {
+      return String(value ?? "").replace(/[&<>"']/g, ch => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[ch]));
+    }
+
+    async function loadRealFixtures() {
+      const league = document.getElementById("leagueChoice").value;
+      const status = document.getElementById("fixtureStatus");
+      const list = document.getElementById("fixtureList");
+      const button = document.getElementById("loadFixturesBtn");
+      button.disabled = true;
+      button.textContent = "Loading…";
+      status.textContent = "Connecting to the public football dataset…";
+      list.innerHTML = "";
+
+      // Current season dataset. The source may not have complete data for every league.
+      const url = `https://raw.githubusercontent.com/openfootball/football.json/master/2026-27/${league}.json`;
+      try {
+        const response = await fetch(url, { cache: "no-store" });
+        if (!response.ok) throw new Error("Dataset not available for this league or season yet.");
+        const data = await response.json();
+        const matches = Array.isArray(data.matches) ? data.matches : [];
+        if (!matches.length) throw new Error("The dataset contains no matches yet.");
+
+        const now = new Date();
+        const enriched = matches.map(m => ({
+          ...m,
+          dateObj: m.date ? new Date(`${m.date}T12:00:00`) : null
+        })).filter(m => m.dateObj && !Number.isNaN(m.dateObj.getTime()));
+
+        const upcoming = enriched.filter(m => !m.score?.ft && m.dateObj >= new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+        const finished = enriched.filter(m => Array.isArray(m.score?.ft));
+        let display = upcoming.slice(0, 8);
+        let label = "Upcoming fixtures";
+        if (!display.length) {
+          display = finished.slice(-8).reverse();
+          label = "Most recently recorded results";
+        }
+        if (!display.length) throw new Error("No displayable fixtures or results found.");
+
+        status.textContent = `${leagueFiles[league]} • ${data.name || "Season 2026–27"} • ${label}`;
+        display.forEach(match => {
+          const dateLabel = match.dateObj.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+          const score = Array.isArray(match.score?.ft) ? `${match.score.ft[0]} – ${match.score.ft[1]}` : "vs";
+          const item = document.createElement("div");
+          item.style.cssText = "display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center;padding:13px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:12px";
+          item.innerHTML = `<div style="font-size:13px;font-weight:650;overflow-wrap:anywhere">${safeText(match.team1)}</div>
+            <div style="text-align:center;min-width:64px"><strong>${safeText(score)}</strong><div style="font-size:10px;color:var(--muted);margin-top:3px">${safeText(dateLabel)}</div></div>
+            <div style="font-size:13px;font-weight:650;text-align:right;overflow-wrap:anywhere">${safeText(match.team2)}</div>`;
+          list.appendChild(item);
+        });
+      } catch (error) {
+        status.textContent = "Could not load this dataset.";
+        list.innerHTML = `<div class="insight"><strong>Data feed unavailable.</strong><br>${safeText(error.message)} Check your internet connection and try again later. The demo dashboard will still work.</div>`;
+      } finally {
+        button.disabled = false;
+        button.textContent = "Load data";
+      }
+    }
+
+    document.getElementById("loadFixturesBtn").addEventListener("click", loadRealFixtures);
+
+  </script>
+</body>
+</html>
