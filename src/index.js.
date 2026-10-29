@@ -1,31 +1,35 @@
 
 export default {
-  async fetch(request) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    const corsHeaders = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
-      "Content-Type": "application/json"
-    };
-
-    if (request.method === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders });
-    }
-
     if (url.pathname === "/api/health") {
-      return Response.json({
-        status: "online",
-        project: "AI Match Intelligence",
-        message: "Football data backend is ready"
-      }, { headers: corsHeaders });
+      return new Response(
+        JSON.stringify({
+          status: "ok",
+          project: "AI Match Intelligence"
+        }),
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
     }
 
-    return Response.json({
-      project: "AI Match Intelligence",
-      status: "online",
-      endpoints: ["/api/health", "/api/matches"],
-      message: "Backend is running. Live football data is not connected yet."
-    }, { headers: corsHeaders });
+    return new Response(
+      JSON.stringify({
+        project: "AI Match Intelligence",
+        status: "online",
+        message: "Backend is running. Live football data is not connected yet."
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
   }
 };
+
