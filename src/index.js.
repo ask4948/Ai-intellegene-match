@@ -1,35 +1,13 @@
-
 export default {
   async fetch(request, env, ctx) {
-    const url = new URL(request.url);
+    // CORS headers
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Max-Age": "86400",
+    };
 
-    if (url.pathname === "/api/health") {
-      return new Response(
-        JSON.stringify({
-          status: "ok",
-          project: "AI Match Intelligence"
-        }),
-        {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        }
-      );
-    }
-
-    return new Response(
-      JSON.stringify({
-        project: "AI Match Intelligence",
-        status: "online",
-        message: "Backend is running. Live football data is not connected yet."
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
-    );
-  }
-};
-
+    // Handle preflight requests
+    if (request.method === "OPTIONS") {
+      return new Response
