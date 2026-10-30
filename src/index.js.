@@ -1,13 +1,18 @@
 export default {
-  async fetch(request, env, ctx) {
-    // CORS headers
-    const corsHeaders = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-      "Access-Control-Max-Age": "86400",
-    };
+  async fetch(request) {
+    const url = new URL(request.url);
 
-    // Handle preflight requests
-    if (request.method === "OPTIONS") {
-      return new Response
+    if (url.pathname === "/api/health") {
+      return Response.json({
+        status: "ok",
+        project: "AI Match Intelligence"
+      });
+    }
+
+    return Response.json({
+      project: "AI Match Intelligence",
+      status: "online",
+      message: "Backend is running."
+    });
+  }
+};
